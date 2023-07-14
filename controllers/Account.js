@@ -15,36 +15,50 @@ const registerUser = asyncHandler(async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const encryptedPassword = await bcrypt.hash(password, salt);
 
-  await User.create({
+  const user = await User.create({
     name: name,
     email: email,
     password: encryptedPassword,
-  })
-    .then((user) => {
-      res.status(201).json({
-        _id: user.id,
-        name: user.name,
-        email: user.email,
-        token: generateToken(user._id, user.name, user.email),
-      });
-    })
-    .catch((error) => {
-      res.status(400);
-      throw new Error("Invalid user data !");
+  });
+
+  if (user) {
+    res.status(201).json({
+      _id: user.id,
+      name: user.name,
+      email: user.email,
+      token: generateToken(user._id, user.name, user.email),
     });
+  } else {
+    res.status(400);
+    throw new Error("Invalid user data");
+  }
 });
 
-const getRoute = asyncHandler(async (req, res) => {
-  res.json({ message: "Get Route" });
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  const userExists = await User.findOne({ email: email });
+
+  if (userExists && (await bcrypt.compare(password, userExists.password))) {
+    res.status(200).json({
+      _id: userExists.id,
+      name: userExists.name,
+      email: userExists.email,
+      token: generateToken(userExists.id, userExists.name, userExists.email),
+    });
+  } else {
+    res.status(400);
+    throw new Error("Invalied User Credientals!");
+  }
 });
 
 const generateToken = (id, name, email) => {
   return jwt.sign({ id, name, email }, process.env.TOKEN_SECRET_KEY, {
-    epiresIn: "30d",
+    expiresIn: "30d",
   });
 };
 
 module.exports = {
   registerUser,
-  getRoute,
+  loginUser,
 };
