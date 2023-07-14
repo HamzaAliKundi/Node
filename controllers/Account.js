@@ -1,7 +1,7 @@
-const asyncHandler = require("express-async-handler");
-const User = require("../models/Account");
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const User = require("../models/Account");
+const asyncHandler = require("express-async-handler");
 
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
@@ -34,6 +34,10 @@ const registerUser = asyncHandler(async (req, res) => {
     });
 });
 
+const getRoute = asyncHandler(async (req, res) => {
+  res.json({ message: "Get Route" });
+});
+
 const generateToken = (id, name, email) => {
   return jwt.sign({ id, name, email }, process.env.TOKEN_SECRET_KEY, {
     epiresIn: "30d",
@@ -42,4 +46,5 @@ const generateToken = (id, name, email) => {
 
 module.exports = {
   registerUser,
+  getRoute,
 };
