@@ -13,6 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/api/user", require("./routes/Accounts"));
+app.use("/api/blog", require("./routes/Blog"));
 
 app.use(errorHandler);
 app.listen(port, () => console.log(`Server Started at : ${port}`));
